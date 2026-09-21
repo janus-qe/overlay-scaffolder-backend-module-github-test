@@ -1,0 +1,49 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: github-scaffolder-publish-e2e
+  title: GitHub publish E2E
+  description: Creates a new GitHub repository under the test org
+spec:
+  owner: user:guest
+  type: service
+  parameters:
+    - title: GitHub publish
+      required:
+        - repoName
+        - repoUrl
+      properties:
+        repoName:
+          title: Repository name
+          type: string
+        repoUrl:
+          title: Repository Location
+          type: string
+          description: GitHub repo URL in scaffolder format
+  steps:
+    - id: fetch-base
+      name: Fetch base content
+      action: fetch:plain:file
+      input:
+        url: https://github.com/janus-qe/overlay-scaffolder-backend-module-github-test/blob/main/content/catalog-info.yaml
+        targetPath: catalog-info.yaml
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+        repoVisibility: private
+        protectDefaultBranch: false
+        gitCommitMessage: initial commit
+    - id: autolink
+      name: Create autolink reference
+      action: github:autolinks:create
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        keyPrefix: E2E-
+        urlTemplate: https://example.com/issue/<num>
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}

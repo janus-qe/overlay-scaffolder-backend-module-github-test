@@ -1,0 +1,40 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: github-scaffolder-repo-push-e2e
+  title: GitHub repo push E2E
+  description: Pushes files to a GitHub repository
+spec:
+  owner: user:guest
+  type: service
+  parameters:
+    - title: Repo push details
+      required:
+        - repoUrl
+        - commitMessage
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+        commitMessage:
+          title: Commit message
+          type: string
+  steps:
+    - id: fetch-change
+      name: Fetch change file
+      action: fetch:plain:file
+      input:
+        url: https://github.com/janus-qe/overlay-scaffolder-backend-module-github-test/blob/main/content/catalog-info.yaml
+        targetPath: e2e-repo-push.yaml
+    - id: push
+      name: Push to GitHub repository
+      action: github:repo:push
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+        protectDefaultBranch: false
+        gitCommitMessage: ${{ parameters.commitMessage }}
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps.push.output.remoteUrl }}
