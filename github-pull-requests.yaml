@@ -1,0 +1,44 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: github-scaffolder-pull-request-e2e
+  title: GitHub pull request E2E
+  description: Opens a GitHub pull request
+spec:
+  owner: user:guest
+  type: service
+  parameters:
+    - title: Pull request details
+      required:
+        - repoUrl
+        - prTitle
+        - branchName
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+        prTitle:
+          title: Pull request title
+          type: string
+        branchName:
+          title: Source branch name
+          type: string
+  steps:
+    - id: fetch-change
+      name: Fetch change file
+      action: fetch:plain:file
+      input:
+        url: https://github.com/janus-qe/overlay-scaffolder-backend-module-github-test/blob/main/content/e2e-pr-change.yaml
+        targetPath: e2e-pr-change.yaml
+    - id: create-pr
+      name: Create pull request
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        title: ${{ parameters.prTitle }}
+        description: Created by GitHub scaffolder E2E test
+        branchName: ${{ parameters.branchName }}
+  output:
+    links:
+      - title: Pull Request
+        url: ${{ steps['create-pr'].output.remoteUrl }}

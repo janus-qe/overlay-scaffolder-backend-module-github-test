@@ -1,0 +1,41 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: github-scaffolder-create-issue-e2e
+  title: GitHub create issue E2E
+  description: Creates a GitHub issue and adds labels
+spec:
+  owner: user:guest
+  type: service
+  parameters:
+    - title: Issue details
+      required:
+        - repoUrl
+        - issueTitle
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+        issueTitle:
+          title: Issue title
+          type: string
+  steps:
+    - id: create-issue
+      name: Create GitHub issue
+      action: github:issues:create
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        title: ${{ parameters.issueTitle }}
+        body: Created by GitHub scaffolder E2E test
+    - id: label-issue
+      name: Label the issue
+      action: github:issues:label
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        number: ${{ steps['create-issue'].output.issueNumber }}
+        labels:
+          - e2e-test
+  output:
+    links:
+      - title: Issue
+        url: ${{ steps['create-issue'].output.issueUrl }}
