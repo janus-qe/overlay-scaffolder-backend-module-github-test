@@ -31,7 +31,9 @@ spec:
       action: github:repo:push
       input:
         repoUrl: ${{ parameters.repoUrl }}
-        defaultBranch: main
+        # New history cannot fast-forward onto main created by publish:github.
+        # Push it to a side branch on that same repository.
+        defaultBranch: e2e-repo-push
         protectDefaultBranch: false
         gitCommitMessage: ${{ parameters.commitMessage }}
   output:
